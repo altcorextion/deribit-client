@@ -1,0 +1,19 @@
+[project]
+name = "deribit-client"
+version = "0.1.0"
+description = "deribit simple client"
+readme = "README.md"
+authors = [
+    { name = "bbwq", email = "example@mail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.20.0",
+    "asyncpg>=0.32.0",
+    "pydantic-settings>=2.16.0",
+    "sqlalchemy[asyncio]>=2.1.4",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
