@@ -1,15 +1,18 @@
 APP_SERVICE := client-deribit
 DB_SERVICE := postgres
-DB_VOLUME := $(DB_SERVICE)_data
+QUEUE_SERVICE := redis
 
 -include .env
 
-.PHONY: up down clean migrate-up migrate-down migration psql test
+.PHONY: up-all up down clean migrate-up migrate-down migration psql api worker beat test test-db lint fmt
 
 # BASE
 
+up-all:
+	docker compose up -d --build
+
 up:
-	docker compose up -d --wait $(DB_SERVICE)
+	docker compose up -d --wait $(DB_SERVICE) $(QUEUE_SERVICE)
 
 down:
 	docker compose down
@@ -31,7 +34,18 @@ migration: # make migration m="name"
 psql:
 	docker compose exec $(DB_SERVICE) psql -U $(DB_USER) -d $(DB_NAME)
 
-# LOCAL
+# SCHEDULE
+
+api:
+	uv run uvicorn deribit_client.api.app:create_app --factory --reload
+
+worker:
+	uv run celery -A deribit_client.worker.app worker --loglevel=info --concurrency=2
+
+beat:
+	uv run celery -A deribit_client.worker.app beat --loglevel=info
+
+# TESTS
 
 test:
 	uv run pytest
@@ -39,3 +53,12 @@ test:
 test-db:
 	-docker compose exec $(DB_SERVICE) createdb -U $(DB_USER) $(DB_NAME)_test
 	DB_NAME=$(DB_NAME)_test uv run alembic upgrade head
+
+lint:
+	uv run ruff check .
+	uv run ruff format --check .
+	uv run mypy src tests
+
+fmt:
+	uv run ruff check --fix --exit-zero .
+	uv run ruff format .

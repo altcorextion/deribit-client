@@ -5,7 +5,7 @@ import pytest
 
 from deribit_client.deribit.client import DeribitClient
 from deribit_client.deribit.transport import DeribitResponse
-from deribit_client.domain import Ticker, IndexPrice
+from deribit_client.domain import IndexPrice, Ticker
 
 
 class FakeTransport:

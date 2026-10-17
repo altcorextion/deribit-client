@@ -1,5 +1,6 @@
 # Deribit client
 
+![CI](https://github.com/altcorextion/deribit-client/actions/workflows/ci.yaml/badge.svg)
 
 ## Build
 
@@ -13,19 +14,57 @@ git clone https://github.com/altcorextion/deribit-client.git && cd deribit-clien
 cp .env.example .env
 ```
 
+3. Запуск:
+```bash
+make up-all
+```
+
+4. Через минуту появятся первые цены, swagger на http://localhost:8000/docs
+```bash
+curl "localhost:8000/api/v1/prices/latest?ticker=btc_usd"
+# {"ticker":"btc_usd","price":"81444.07000000","timestamp":1792209637}
+```
+
+Локально:
+```bash
+uv sync
+make up
+make migrate-up
+make api # make worker и make beat
+```
+
+## Make list
+
 Скачать зависимости:
 ```bash
 uv sync
 ```
 
-3. Запуск:
+Запуск postgres + redis:
 ```bash
 make up
 ```
 
-4. Миграции:
+Миграции:
 ```bash
 make migrate-up
+```
+
+Сбор цен (в разных терминалах):
+```bash
+make worker
+make beat
+```
+
+API (`/docs`):
+```bash
+make api
+```
+
+Тесты:
+```bash
+make test-db
+make test
 ```
 
 
@@ -106,3 +145,36 @@ Postgres разворачивается в docker, с клиентом связ�
 - границы включительно
 - граница открыта
 - Decimal
+
+
+### Celery
+
+Celery работает через брокер, в данном случае будет использоваться Redis (второй образ в compose). 
+Задача celery синхронная, на каждый запуск вызывается `asyncio.run`. asyncpg привязывает соединение с eventloop, 
+а `asyncio.run` на каждый запуск создаёт новый, для этого они ограничиваются `NullPool` (только одно)
+
+Тикеры запрашиваются параллельно, сохраняются в любом случае, если получены. beat только один
+
+Тесты:
+- сохранение обоих тикеров
+- сохранение тикера при падении второго, вывод ошибки
+
+
+### API
+
+Ручки реализуются по исходному контракту, swagger на `/docs`, **GET**:
+- `limit` - 1-1000 (по умолчанию 100), `offset` - от 0
+- `from`/`to` - необязательные
+- `/latest` (без данных) - 404, иначе 402 (нет тикера, выход за диапазон)
+
+Тесты по возвращающимся типам и кодам
+
+
+### Docker/CI
+
+Контейнеров вышло более двух, т.к. celery требует очередь (уже 3), далее отдельные процессы так же разнесены по сервисам
+
+Один образ на всё приложение, сервисы отличаются только командой:
+- migrate - `alembic upgrade head`
+- api - uvicorn
+- worker / beat - celery

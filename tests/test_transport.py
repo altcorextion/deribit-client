@@ -1,16 +1,17 @@
+from collections.abc import AsyncIterator
 from decimal import Decimal
-from typing import Any, AsyncIterator
+from typing import Any
 
 import aiohttp
 import pytest
-from aiohttp import web, test_utils
+from aiohttp import test_utils, web
 
 from deribit_client.deribit.errors import DeribitError
-from deribit_client.deribit.transport import HttpTransport, DeribitResponse
+from deribit_client.deribit.transport import DeribitResponse, HttpTransport
 
 
 class FakeDeribit:
-    """ Ответ json-prc 2.0 payload и итерация запросов """
+    """Ответ json-prc 2.0 payload и итерация запросов"""
 
     def __init__(self) -> None:
         self.requests: list[dict[str, Any]] = []
@@ -20,8 +21,7 @@ class FakeDeribit:
     async def handle(self, request: web.Request) -> web.Response:
         self.requests.append(await request.json())
         if isinstance(self.payload, str):
-            return web.Response(status=self.status, text=self.payload,
-                                content_type="text/html")
+            return web.Response(status=self.status, text=self.payload, content_type="text/html")
         return web.json_response(self.payload, status=self.status)
 
 
@@ -58,7 +58,9 @@ async def test_increments_request_id(deribit: FakeDeribit, transport: HttpTransp
     assert [request["id"] for request in deribit.requests] == [1, 2]
 
 
-async def test_returns_result_and_server_time(deribit: FakeDeribit, transport: HttpTransport) -> None:
+async def test_returns_result_and_server_time(
+    deribit: FakeDeribit, transport: HttpTransport
+) -> None:
     deribit.payload = {
         "jsonrpc": "2.0",
         "id": 1,
@@ -80,7 +82,9 @@ async def test_returns_result_and_server_time(deribit: FakeDeribit, transport: H
     )
 
 
-async def test_raises_deribit_error_on_error_response(deribit: FakeDeribit, transport: HttpTransport) -> None:
+async def test_raises_deribit_error_on_error_response(
+    deribit: FakeDeribit, transport: HttpTransport
+) -> None:
     deribit.status = 400
     deribit.payload = {
         "jsonrpc": "2.0",

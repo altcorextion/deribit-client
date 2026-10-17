@@ -34,13 +34,13 @@ class IndexPriceRepository:
         )
 
     async def get_by_range(
-            self,
-            ticker: Ticker,
-            *,
-            date_from: int | None,
-            date_to: int | None,
-            limit: int,
-            offset: int,
+        self,
+        ticker: Ticker,
+        *,
+        date_from: int | None,
+        date_to: int | None,
+        limit: int,
+        offset: int,
     ) -> list[IndexPrice]:
         statement = select(IndexPriceModel).where(IndexPriceModel.ticker == ticker.value)
         if date_from is not None:

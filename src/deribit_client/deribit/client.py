@@ -1,5 +1,5 @@
 from deribit_client.deribit.transport import JsonRpcTransport
-from deribit_client.domain import Ticker, IndexPrice
+from deribit_client.domain import IndexPrice, Ticker
 
 
 class DeribitClient:
@@ -14,5 +14,5 @@ class DeribitClient:
         return IndexPrice(
             ticker=ticker,
             price=response.result["index_price"],
-            timestamp=response.us_out // 1_000_000 # без микросекунд
+            timestamp=response.us_out // 1_000_000,  # без микросекунд
         )
