@@ -19,3 +19,6 @@ COPY --from=builder --chown=app:app /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 USER app
 WORKDIR /app
+
+COPY --chown=app:app alembic.ini ./
+COPY --chown=app:app migrations ./migrations
