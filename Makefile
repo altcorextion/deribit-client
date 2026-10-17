@@ -35,3 +35,7 @@ psql:
 
 test:
 	uv run pytest
+
+test-db:
+	-docker compose exec $(DB_SERVICE) createdb -U $(DB_USER) $(DB_NAME)_test
+	DB_NAME=$(DB_NAME)_test uv run alembic upgrade head
