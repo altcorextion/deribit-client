@@ -1,15 +1,15 @@
 APP_SERVICE := client-deribit
 DB_SERVICE := postgres
-DB_VOLUME := $(DB_SERVICE)_data
+QUEUE_SERVICE := redis
 
 -include .env
 
-.PHONY: up down clean migrate-up migrate-down migration psql test
+.PHONY: up down clean migrate-up migrate-down migration psql worker beat test test-db
 
 # BASE
 
 up:
-	docker compose up -d --wait $(DB_SERVICE)
+	docker compose up -d --wait $(DB_SERVICE) $(QUEUE_SERVICE)
 
 down:
 	docker compose down
@@ -31,7 +31,15 @@ migration: # make migration m="name"
 psql:
 	docker compose exec $(DB_SERVICE) psql -U $(DB_USER) -d $(DB_NAME)
 
-# LOCAL
+# SCHEDULE
+
+worker:
+	uv run celery -A deribit_client.worker.app worker --loglevel=info
+
+beat:
+	uv run celery -A deribit_client.worker.app beat --loglevel=info
+
+# TESTS
 
 test:
 	uv run pytest

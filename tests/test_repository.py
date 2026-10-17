@@ -2,23 +2,16 @@ from collections.abc import AsyncIterator
 from decimal import Decimal
 
 import pytest
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from deribit_client.config import DatabaseSettings
 from deribit_client.db.repository import IndexPriceRepository
 from deribit_client.domain import IndexPrice, Ticker
 
 
 @pytest.fixture
-async def repository() -> AsyncIterator[IndexPriceRepository]:
-    settings = DatabaseSettings()
-    engine = create_async_engine(settings.url.set(database=f"{settings.name}_test"))
-    async with engine.connect() as connection:
-        transaction = await connection.begin()
-        async with AsyncSession(bind=connection) as session:
-            yield IndexPriceRepository(session)
-        await transaction.rollback()
-    await engine.dispose()
+async def repository(session_factory: async_sessionmaker[AsyncSession]) -> AsyncIterator[IndexPriceRepository]:
+    async with session_factory() as session:
+        yield IndexPriceRepository(session)
 
 
 def btc(timestamp: int, price: str = "100") -> IndexPrice:
