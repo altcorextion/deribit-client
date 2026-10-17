@@ -1,18 +1,18 @@
 import asyncio
 from collections.abc import Sequence
 
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from deribit_client.db.repository import IndexPriceRepository
 from deribit_client.deribit.client import DeribitClient
-from deribit_client.domain import Ticker, IndexPrice
+from deribit_client.domain import IndexPrice, Ticker
 
 
 class IndexPriceCollector:
-    """ Забирает index price по тикерам и сохраняет их """
+    """Забирает index price по тикерам и сохраняет их"""
 
     def __init__(
-            self, client: DeribitClient, session_factory: async_sessionmaker[AsyncSession]
+        self, client: DeribitClient, session_factory: async_sessionmaker[AsyncSession]
     ) -> None:
         self._client = client
         self._session_factory = session_factory

@@ -14,6 +14,7 @@ async def get_repository(request: Request) -> AsyncIterator[IndexPriceRepository
     async with session_factory() as session:
         yield IndexPriceRepository(session)
 
+
 Repository = Annotated[IndexPriceRepository, Depends(get_repository)]
 Limit = Annotated[int, Query(ge=1, le=1000)]
 Offset = Annotated[int, Query(ge=0)]
@@ -23,7 +24,7 @@ router = APIRouter(prefix="/api/v1/prices", tags=["prices"])
 
 @router.get("")
 async def get_prices(
-        ticker: Ticker, repository: Repository, limit: Limit = 100, offset: Offset = 0
+    ticker: Ticker, repository: Repository, limit: Limit = 100, offset: Offset = 0
 ) -> list[IndexPriceResponse]:
     prices = await repository.get_all(ticker, limit=limit, offset=offset)
     return [IndexPriceResponse.from_domain(price) for price in prices]
@@ -39,12 +40,12 @@ async def get_latest_price(ticker: Ticker, repository: Repository) -> IndexPrice
 
 @router.get("/filtered")
 async def get_prices_by_date(
-        ticker: Ticker,
-        repository: Repository,
-        date_from: Annotated[int | None, Query(alias="from", ge=0)] = None,
-        date_to: Annotated[int | None, Query(alias="to", ge=0)] = None,
-        limit: Limit = 100,
-        offset: Offset = 0,
+    ticker: Ticker,
+    repository: Repository,
+    date_from: Annotated[int | None, Query(alias="from", ge=0)] = None,
+    date_to: Annotated[int | None, Query(alias="to", ge=0)] = None,
+    limit: Limit = 100,
+    offset: Offset = 0,
 ) -> list[IndexPriceResponse]:
     if date_from is not None and date_to is not None and date_from > date_to:
         raise HTTPException(status_code=422, detail="'from' must be <= 'to'")

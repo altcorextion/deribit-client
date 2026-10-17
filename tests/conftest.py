@@ -1,7 +1,7 @@
 from collections.abc import AsyncIterator
 
 import pytest
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from deribit_client.config import DatabaseSettings
 

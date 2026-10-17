@@ -13,7 +13,7 @@ from deribit_client.worker.collector import IndexPriceCollector
 
 
 class FakeTransport:
-    """ Отвечает ценой 100 или кидает DeribitError для index_name из failing """
+    """Отвечает ценой 100 или кидает DeribitError для index_name из failing"""
 
     def __init__(self, failing: frozenset[str] = frozenset()) -> None:
         self._failing = failing
@@ -29,7 +29,7 @@ def price(ticker: Ticker) -> IndexPrice:
 
 
 async def test_collect_saves_all_tickers(
-        session_factory: async_sessionmaker[AsyncSession],
+    session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
     collector = IndexPriceCollector(DeribitClient(FakeTransport()), session_factory)
 
@@ -42,7 +42,7 @@ async def test_collect_saves_all_tickers(
 
 
 async def test_collect_saves_successful_and_raises_for_failed(
-        session_factory: async_sessionmaker[AsyncSession],
+    session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
     transport = FakeTransport(failing=frozenset({"eth_usd"}))
     collector = IndexPriceCollector(DeribitClient(transport), session_factory)
