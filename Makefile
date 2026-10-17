@@ -4,7 +4,7 @@ QUEUE_SERVICE := redis
 
 -include .env
 
-.PHONY: up down clean migrate-up migrate-down migration psql worker beat test test-db
+.PHONY: up down clean migrate-up migrate-down migration psql api worker beat test test-db
 
 # BASE
 
@@ -32,6 +32,9 @@ psql:
 	docker compose exec $(DB_SERVICE) psql -U $(DB_USER) -d $(DB_NAME)
 
 # SCHEDULE
+
+api:
+	uv run uvicorn deribit_client.api.app:create_app --factory --reload
 
 worker:
 	uv run celery -A deribit_client.worker.app worker --loglevel=info
