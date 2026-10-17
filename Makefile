@@ -4,7 +4,7 @@ DB_VOLUME := $(DB_SERVICE)_data
 
 -include .env
 
-.PHONY: up down clean migrate-up migrate-down migration psql
+.PHONY: up down clean migrate-up migrate-down migration psql test
 
 # BASE
 
@@ -30,3 +30,8 @@ migration: # make migration m="name"
 
 psql:
 	docker compose exec $(DB_SERVICE) psql -U $(DB_USER) -d $(DB_NAME)
+
+# LOCAL
+
+test:
+	uv run pytest
